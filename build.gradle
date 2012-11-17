@@ -1,0 +1,105 @@
+configure(allprojects) {
+    apply plugin: 'java'
+    apply plugin: 'eclipse'
+    
+    group = 'org.etherlords'
+    
+    sourceCompatibility=1.6
+    targetCompatibility=1.6
+    
+    ext {    
+        junitVersion = '4.10'
+        mockitoVersion = '1.8.5'
+        springVersion = '3.1.0.RELEASE'
+        
+        projectVersion = '0.1.0'
+        projectClassifier = 'SNAPSHOT'
+    }
+    
+    def defaultEncoding = 'UTF-8'  
+    
+    version = projectVersion
+    
+    jar {
+        classifier = projectClassifier
+    }
+    
+    compileJava {  
+        options.encoding = defaultEncoding  // affects *.java under src/main/java  
+                                            // alternative: "file.encoding" property  
+    }
+    
+    compileTestJava {  
+        options.encoding = defaultEncoding  // affects *.java under src/test/java  
+                                            // alternative: "file.encoding" property  
+    }  
+    
+	//tasks.withType(Compile) { 
+	//    options.compilerArgs << "-Xlint:all" 
+	//} 
+
+    test.systemProperty("java.awt.headless", "true")
+    
+    repositories {
+        flatDir { dirs "lib" }
+        mavenCentral()
+        maven {
+            url 'http://www.springsource.com/repository/'
+        }
+    }
+    
+    dependencies {
+        
+        compile "org.slf4j:slf4j-api:1.6.1"
+        
+        testCompile "junit:junit-dep:${junitVersion}"
+        testCompile "org.mockito:mockito-all:${mockitoVersion}"
+    }
+}
+
+project("ametisten-stat") {
+
+    apply plugin: 'war'
+    
+    dependencies {
+    
+        providedCompile 'javax.servlet:servlet-api:2.5'
+        
+        providedCompile 'org.hibernate:hibernate-annotations:3.4.0.GA'  
+        
+        providedCompile "commons-lang:commons-lang:2.5"
+        
+        providedCompile "org.springframework:spring-orm:${springVersion}"
+        providedCompile 'org.slf4j:slf4j-log4j12:1.6.1'
+        
+        providedCompile 'commons-dbcp:commons-dbcp:1.4'
+        providedCompile 'cglib:cglib:2.2.2'
+        
+        providedCompile 'mysql:mysql-connector-java:5.1.6'
+        providedCompile "org.springframework:spring-webmvc:${springVersion}"
+        
+        // @deprecation candidate
+        providedCompile 'javax.persistence:persistence-api:1.0'
+        providedCompile 'javax.servlet:servlet-api:2.5'
+        providedCompile "org.springframework:spring-jdbc:${springVersion}"
+        providedCompile 'org.codehaus.jackson:jackson-mapper-asl:1.6.4'
+        providedCompile 'org.hibernate:hibernate-core:3.3.2.GA'
+        providedCompile 'commons-fileupload:commons-fileupload:1.2.2'
+        providedCompile 'commons-io:commons-io:2.4'
+        
+    }
+    
+}
+
+configure(rootProject) {
+
+    description = 'Ametiste Engine'
+
+    // don't publish the default jar for the root project
+    configurations.archives.artifacts.clear()
+    
+    dependencies {
+      	testCompile project(":ametisten-stat")
+    }
+    
+}

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.1.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd">
+        
+    <!--  DOMAIN ENVIRONMENT -->
+    
+    <bean id="domainRepositorySupport" abstract="true">
+        <property name="domainRepository" ref="domainRepository" />
+    </bean>
+    
+    <bean id="accountReportRepository" class="org.etherlords.ametisten.stat.infrastructure.GenericInMemoryReportRepository" />
+	
+    <bean id="domainRepository" class="org.etherlords.ametisten.stat.domain.shared.InMemoryDomainRepository">
+        <property name="messageRouter" ref="messageRouter" />
+    </bean>
+            
+    <bean id="messageRouter" class="org.etherlords.ametisten.stat.event.CommonMessageRouter" init-method="registerHandlers">
+        <property name="eventHandlers">
+            <set>
+            	<bean class="org.etherlords.ametisten.stat.application.event.handlers.PlayerCreatedEventHandler">
+            		<property name="accountReportRepository" ref="accountReportRepository" />
+            	</bean>
+                <bean class="org.etherlords.ametisten.stat.application.event.handlers.MatchEndedEventHandler">
+                	<property name="accountReportRepository" ref="accountReportRepository" />
+                </bean>
+            </set>
+        </property>
+        
+        <property name="commandHandlers">
+            <set>
+            
+                <bean class="org.etherlords.ametisten.stat.application.command.handlers.CreatePlayerCommandHandler" 
+                    parent="domainRepositorySupport" />
+                    
+                <bean class="org.etherlords.ametisten.stat.application.command.handlers.CreateGameMatchCommandHandler" 
+                    parent="domainRepositorySupport">
+                    
+                    <property name="messageRouter" ref="messageRouter" />
+                    
+                </bean>
+                
+                <bean class="org.etherlords.ametisten.stat.application.command.handlers.SendMatchResultCommandHandler" 
+                	parent="domainRepositorySupport" />
+                
+            </set>
+        </property>
+        
+    </bean>
+    
+    <!--  /// DOMAIN ENVIRONMENT -->
+        
+</beans>
