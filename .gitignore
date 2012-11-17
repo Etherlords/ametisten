@@ -1,7 +1,9 @@
 #################
 ## Eclipse
 #################
-
+.springBeans
+.gradle/
+*.
 *.pydevproject
 .project
 .metadata
